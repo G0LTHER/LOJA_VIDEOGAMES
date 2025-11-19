@@ -124,7 +124,7 @@ void consultar(FILE *arq) {
 
     total = tamanho(arq);
     if (nr <= 0 || nr > total) {
-        printf("Código inválido! Total = %d\n", total);
+        printf("Código inválido! Total de registros = %d\n", total);
         return;
     }
 
@@ -140,7 +140,7 @@ void consultar(FILE *arq) {
 
     printf("\n=== JOGO (CÓDIGO %d) ===\n", nr);
     if (item.status == '*') {
-        printf("Status: EXCLUÍDO LOGICAMENTE\n");
+        printf("Status: ** EXCLUÍDO LOGICAMENTE **\n");
     }
     printf("Título.....: %s\n", item.titulo);
     printf("Plataforma.: %s\n", item.plataforma);
@@ -157,7 +157,7 @@ void gerar_arquivo_texto(FILE *arq) {
     int total;
     char status_str[12];
 
-    printf("\nGerar Arquivo Texto\n");
+    printf("\nGerar Relatório em Arquivo Texto\n");
     printf("Nome do arquivo (sem extensão): ");
     ler_string(nomearq, sizeof(nomearq));
     strcat(nomearq, ".txt");
@@ -169,16 +169,16 @@ void gerar_arquivo_texto(FILE *arq) {
     }
 
     fprintf(arqtxt, "RELATÓRIO - LOJA DE VIDEOGAMES\n\n");
-    fprintf(arqtxt, "COD  %-30s %-10s %-10s %8s %7s\n",
-            "TÍTULO", "PLATAF.", "GÊNERO", "PREÇO", "ESTOQUE");
-    fprintf(arqtxt, "--------------------------------------------------------------------------------\n");
+    fprintf(arqtxt, "COD  %-30s %-10s %-10s %8s %7s  %s\n",
+            "TÍTULO", "PLATAFORMA", "GÊNERO", "PREÇO", "ESTOQUE", "STATUS");
+    fprintf(arqtxt, "----------------------------------------------------------------------------------------\n");
 
     total = tamanho(arq);
     for (i = 0; i < total; i++) {
         fseek(arq, i * sizeof(jogo), SEEK_SET);
         fread(&item, sizeof(jogo), 1, arq);
         if (item.status == '*')
-            strcpy(status_str, "EXCLUIDO");
+            strcpy(status_str, "EXCLUÍDO");
         else
             strcpy(status_str, "ATIVO");
         fprintf(arqtxt, "%03d  %-30s %-10s %-10s %8.2f %7d  %s\n",
@@ -213,7 +213,7 @@ void vender(FILE *arq) {
     limpa_buffer();
     total = tamanho(arq);
     if (nr <= 0 || nr > total) {
-        printf("Código inválido. Total = %d\n", total);
+        printf("Código inválido. Total de registros = %d\n", total);
         return;
     }
 
@@ -224,7 +224,7 @@ void vender(FILE *arq) {
     }
 
     if (item.status == '*') {
-        printf("Registro excluído.\n");
+        printf("Este registro está logicamente excluído e não pode ser vendido.\n");
         return;
     }
 
@@ -243,7 +243,7 @@ void vender(FILE *arq) {
         return;
     }
     if (qtd > item.estoque) {
-        printf("Estoque insuficiente.\n");
+        printf("Estoque insuficiente para a venda.\n");
         return;
     }
 
@@ -260,14 +260,13 @@ void vender(FILE *arq) {
         fseek(arq, (long)(nr - 1) * sizeof(jogo), SEEK_SET);
         fwrite(&item, sizeof(jogo), 1, arq);
         fflush(arq);
-        printf("Venda realizada. Total: R$ %.2f\n", item.preco * qtd);
+        printf("Venda realizada com sucesso! Total: R$ %.2f\n", item.preco * qtd);
         printf("Estoque atualizado: %d\n", item.estoque);
     } else {
         printf("Venda cancelada.\n");
     }
 }
 
-/* Reposição de estoque (restock) */
 void reposicao(FILE *arq) {
     int nr;
     int qtd;
@@ -285,7 +284,7 @@ void reposicao(FILE *arq) {
 
     total = tamanho(arq);
     if (nr <= 0 || nr > total) {
-        printf("Código inválido. Total = %d\n", total);
+        printf("Código inválido. Total de registros = %d\n", total);
         return;
     }
 
@@ -296,7 +295,7 @@ void reposicao(FILE *arq) {
     }
 
     if (item.status == '*') {
-        printf("Registro excluído.\n");
+        printf("Registro logicamente excluído. Não é possível repor o estoque.\n");
         return;
     }
 
@@ -328,20 +327,20 @@ void reposicao(FILE *arq) {
         fseek(arq, (long)(nr - 1) * sizeof(jogo), SEEK_SET);
         fwrite(&item, sizeof(jogo), 1, arq);
         fflush(arq);
+        printf("Estoque reposto com sucesso!\n");
         printf("Estoque atualizado: %d\n", item.estoque);
     } else {
         printf("Reposição cancelada.\n");
     }
 }
 
-/* Exclusão lógica */
 void excluir(FILE *arq) {
     int nr;
     char confirma;
     jogo item;
     int total;
 
-    printf("\nInforme o código do registro para excluir: ");
+    printf("\nInforme o código do registro para exclusão: ");
     if (scanf("%d", &nr) != 1) {
         printf("Entrada inválida!\n");
         limpa_buffer();
@@ -351,7 +350,7 @@ void excluir(FILE *arq) {
 
     total = tamanho(arq);
     if (nr <= 0 || nr > total) {
-        printf("Código inválido. Total = %d\n", total);
+        printf("Código inválido. Total de registros = %d\n", total);
         return;
     }
 
@@ -362,11 +361,11 @@ void excluir(FILE *arq) {
     }
 
     if (item.status == '*') {
-        printf("Registro já estava excluído.\n");
+        printf("Registro já estava logicamente excluído.\n");
         return;
     }
 
-    printf("Confirmar exclusão do jogo '%s' (s/n)? ", item.titulo);
+    printf("Confirmar exclusão lógica do jogo '%s' (s/n)? ", item.titulo);
     if (scanf("%c", &confirma) != 1) {
         printf("Entrada inválida.\n");
         limpa_buffer();
@@ -379,16 +378,17 @@ void excluir(FILE *arq) {
         fseek(arq, (long)(nr - 1) * sizeof(jogo), SEEK_SET);
         fwrite(&item, sizeof(jogo), 1, arq);
         fflush(arq);
-        printf("Registro excluído com sucesso!\n");
+        printf("Registro excluído logicamente com sucesso!\n");
     } else {
         printf("Exclusão cancelada.\n");
     }
 }
 
-/* Configura locale para acentuação */
+/* Configura locale e o console para UTF-8 */
 void configurar_locale(void) {
     #if defined(_WIN32)
-    system("chcp 65001 > nul");
+    /* ESSA LINHA É CRUCIAL PARA CORRIGIR A EXIBIÇÃO NO CONSOLE DO WINDOWS */
+    system("chcp 65001 > nul"); 
     #endif
 
     {
@@ -403,12 +403,11 @@ void configurar_locale(void) {
         for (i = 0; i < 5; i++) {
             const char *r = setlocale(LC_ALL, locais[i]);
             if (r != NULL) {
-                /* Exibe o locale ativo */
                 printf("Locale ativo: %s\n", r);
                 return;
             }
         }
-        printf("Aviso: Locale não pôde ser configurado.\n");
+        printf("Aviso: Locale não pode ser configurado.\n");
     }
 }
 
@@ -417,6 +416,7 @@ int main(void) {
     FILE *arq;
     int op;
 
+    // A chamada aqui é essencial!
     configurar_locale();
 
     arq = fopen("loja.dat", "r+b");
