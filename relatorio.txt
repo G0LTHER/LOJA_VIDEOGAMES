@@ -1,0 +1,7 @@
+RELATÓRIO - LOJA DE VIDEOGAMES
+
+COD  TÍTULO                         PLATAFORMA GÊNERO        PREÇO ESTOQUE  STATUS
+----------------------------------------------------------------------------------------
+001  GTA V                          PS5, Switch, PC Mundo Aberto   120,00     100  ATIVO
+002  Need for Speed                 Todas      Corrida       60,00      80  EXCLUÍDO
+003  Tenken 7                       todas      luta         300,00     120  ATIVO
